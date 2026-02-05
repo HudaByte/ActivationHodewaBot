@@ -39,8 +39,7 @@ export default function LoginPage() {
     return (
         <div className="login-container">
             <div className="login-card">
-                <h1 className="login-title">Activation Admin</h1>
-                <p className="login-subtitle">Sign in to manage activation codes</p>
+
 
                 {error && <div className="error-message">{error}</div>}
 
