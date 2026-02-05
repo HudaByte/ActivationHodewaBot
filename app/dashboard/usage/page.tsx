@@ -106,9 +106,9 @@ export default async function UsagePage() {
                                     activation_code_id: string;
                                     broadcasts_count: number;
                                     messages_sent: number;
-                                    activation_codes: { id: string; code: string; app_type: string; note: string | null } | null;
+                                    activation_codes: { id: string; code: string; app_type: string; note: string | null }[];
                                 }, index: number) => {
-                                    const code = item.activation_codes;
+                                    const code = item.activation_codes?.[0];
                                     if (!code) return null;
 
                                     const typeIcon = code.app_type === 'HodewaBot'
@@ -174,12 +174,12 @@ export default async function UsagePage() {
                                     broadcasts_count: number;
                                     messages_sent: number;
                                     groups_joined: number;
-                                    activation_codes: { code: string; app_type: string; note: string | null } | null;
+                                    activation_codes: { code: string; app_type: string; note: string | null }[];
                                 }) => (
                                     <tr key={item.id}>
                                         <td>{item.date}</td>
                                         <td>
-                                            <CopyableCode code={item.activation_codes?.code || 'Unknown'} />
+                                            <CopyableCode code={item.activation_codes?.[0]?.code || 'Unknown'} />
                                         </td>
                                         <td>{item.broadcasts_count || 0}</td>
                                         <td>{item.messages_sent || 0}</td>
