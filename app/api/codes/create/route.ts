@@ -19,7 +19,13 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const { max_devices, duration_days, note } = await request.json();
+        const {
+            app_type,
+            max_devices,
+            duration_days,
+            note,
+            max_whatsapp_profiles,
+        } = await request.json();
 
         if (!max_devices || max_devices < 1) {
             return NextResponse.json(
@@ -45,15 +51,17 @@ export async function POST(request: NextRequest) {
             attempts++;
         } while (attempts < 10);
 
-        // Insert new code
+        // Insert new code with all fields
         const { error } = await supabase
             .from('activation_codes')
             .insert({
                 code,
+                app_type: app_type || 'HodewaBot',
                 max_devices,
                 duration_days: duration_days || null,
                 note: note || null,
                 is_active: true,
+                max_whatsapp_profiles: max_whatsapp_profiles || 3,
             });
 
         if (error) {
