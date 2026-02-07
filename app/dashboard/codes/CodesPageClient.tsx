@@ -1,29 +1,15 @@
-// ... imports
-import { useSearchParams } from 'next/navigation';
+'use client';
 
-// ... interface
+import React, { useState, useTransition, useOptimistic } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { formatDateWIB } from '@/lib/utils';
+import type { AppType } from '@/lib/supabase';
+import CopyableCode from '@/app/components/CopyableCode';
 
-export default function CodesPageClient({ codes }: Props) {
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const activeTab = (searchParams.get('type') as 'HodewaBot' | 'HodewaLink') || 'HodewaBot';
-    const [, startTransition] = useTransition();
-    // ...
-
-    // Switch tab handler
-    const setActiveTab = (tab: 'HodewaBot' | 'HodewaLink') => {
-        const params = new URLSearchParams(searchParams.toString());
-        params.set('type', tab);
-        params.set('page', '1'); // Reset to page 1 on tab switch
-        router.push(`?${params.toString()}`);
-    };
-
-    // ... create code handler reads activeTab from URL ...
-    // Note: Previous filteredCodes logic is now REDUNDANT if server filters properly.
-    // But we might still need to optimistic update.
-    // For now, let's assume `codes` passed prop IS ALREADY filtered by server.
-    const filteredCodes = optimisticCodes; // Already filtered from server
-
+interface ActivationCode {
+    id: string;
+    code: string;
     app_type: AppType;
     max_devices: number;
     duration_days: number | null;
@@ -36,8 +22,8 @@ export default function CodesPageClient({ codes }: Props) {
         device_id: string;
         expires_at: string;
     }>;
-    user_profiles ?: Array<{ id: string }>;
-    link_stats ?: Array<{
+    user_profiles?: Array<{ id: string }>;
+    link_stats?: Array<{
         total_scraped: number;
         total_generated: number;
         total_exported: number;
