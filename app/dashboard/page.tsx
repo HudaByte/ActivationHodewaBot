@@ -4,19 +4,22 @@ async function getStats() {
     const supabase = createServerClient();
     const now = new Date().toISOString();
 
-    // Parallel queries - 4x lebih cepat
-    const [totalCodesRes, activeCodesRes, activeDevicesRes, expiredDevicesRes] = await Promise.all([
+    // Parallel queries with error handling
+    const [totalCodesRes, activeCodesRes, activeDevicesRes, expiredDevicesRes] = await Promise.allSettled([
         supabase.from('activation_codes').select('*', { count: 'exact', head: true }),
         supabase.from('activation_codes').select('*', { count: 'exact', head: true }).eq('is_active', true),
         supabase.from('device_sessions').select('*', { count: 'exact', head: true }).gt('expires_at', now),
         supabase.from('device_sessions').select('*', { count: 'exact', head: true }).lte('expires_at', now),
     ]);
 
+    const getCount = (res: PromiseSettledResult<any>) =>
+        (res.status === 'fulfilled' && res.value.count !== null) ? res.value.count : 0;
+
     return {
-        totalCodes: totalCodesRes.count || 0,
-        activeCodes: activeCodesRes.count || 0,
-        activeDevices: activeDevicesRes.count || 0,
-        expiredDevices: expiredDevicesRes.count || 0,
+        totalCodes: getCount(totalCodesRes),
+        activeCodes: getCount(activeCodesRes),
+        activeDevices: getCount(activeDevicesRes),
+        expiredDevices: getCount(expiredDevicesRes),
     };
 }
 

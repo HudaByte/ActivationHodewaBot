@@ -43,6 +43,7 @@ export interface ActivationCode {
     created_at: string;
     is_active: boolean;
     note: string | null;
+    first_activated_at: string | null; // Tracks when code was first activated
     // New fields for multi-app support
     app_type: AppType;
     max_groups: number;

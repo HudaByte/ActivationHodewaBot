@@ -1,33 +1,69 @@
-'use client';
+// ... imports
+import { useSearchParams } from 'next/navigation';
 
-import { useState, useOptimistic, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { createServerClient } from '@/lib/supabase';
-import CopyableCode from '@/app/components/CopyableCode';
-import { formatDateWIB } from '@/lib/utils';
-import type { AppType } from '@/lib/supabase';
+// ... interface
 
-interface ActivationCode {
-    id: string;
-    code: string;
+export default function CodesPageClient({ codes }: Props) {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const activeTab = (searchParams.get('type') as 'HodewaBot' | 'HodewaLink') || 'HodewaBot';
+    const [, startTransition] = useTransition();
+    // ...
+
+    // Switch tab handler
+    const setActiveTab = (tab: 'HodewaBot' | 'HodewaLink') => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('type', tab);
+        params.set('page', '1'); // Reset to page 1 on tab switch
+        router.push(`?${params.toString()}`);
+    };
+
+    // ... create code handler reads activeTab from URL ...
+    // Note: Previous filteredCodes logic is now REDUNDANT if server filters properly.
+    // But we might still need to optimistic update.
+    // For now, let's assume `codes` passed prop IS ALREADY filtered by server.
+    const filteredCodes = optimisticCodes; // Already filtered from server
+
     app_type: AppType;
     max_devices: number;
     duration_days: number | null;
     created_at: string;
     is_active: boolean;
     note: string | null;
+    first_activated_at: string | null;
     device_sessions: Array<{
         id: string;
         device_id: string;
         expires_at: string;
     }>;
-    user_profiles?: Array<{ id: string }>;
-    link_stats?: Array<{
+    user_profiles ?: Array<{ id: string }>;
+    link_stats ?: Array<{
         total_scraped: number;
         total_generated: number;
         total_exported: number;
     }>;
+}
+
+// Helper function to get activation status
+function getActivationStatus(code: ActivationCode): { status: 'never' | 'active' | 'expired'; label: string; className: string } {
+    if (!code.first_activated_at) {
+        return { status: 'never', label: 'Belum Diaktivasi', className: 'status-warning' };
+    }
+
+    if (code.duration_days === null) {
+        return { status: 'active', label: 'Aktif (Lifetime)', className: 'status-active' };
+    }
+
+    const firstActivated = new Date(code.first_activated_at);
+    const expiresAt = new Date(firstActivated);
+    expiresAt.setDate(expiresAt.getDate() + code.duration_days);
+
+    if (expiresAt > new Date()) {
+        const remaining = Math.ceil((expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+        return { status: 'active', label: `Aktif (${remaining} hari)`, className: 'status-active' };
+    }
+
+    return { status: 'expired', label: 'Expired', className: 'status-inactive' };
 }
 
 interface Props {
@@ -36,8 +72,10 @@ interface Props {
 
 export default function CodesPageClient({ codes }: Props) {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const activeTab = (searchParams.get('type') as 'HodewaBot' | 'HodewaLink') || 'HodewaBot';
     const [, startTransition] = useTransition();
-    const [activeTab, setActiveTab] = useState<'HodewaBot' | 'HodewaLink'>('HodewaBot');
+
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [loading, setLoading] = useState(false);
     const [extendModal, setExtendModal] = useState<{ code: string; open: boolean }>({ code: '', open: false });
@@ -52,17 +90,22 @@ export default function CodesPageClient({ codes }: Props) {
         max_whatsapp_profiles: 3,
     });
 
-    // Optimistic state untuk instant UI update
+    // Optimistic state
     const [optimisticCodes, updateOptimisticCodes] = useOptimistic(
         codes,
         (state, { code, is_active }: { code: string; is_active: boolean }) =>
             state.map(c => c.code === code ? { ...c, is_active } : c)
     );
 
-    // Filter codes by type
-    const filteredCodes = optimisticCodes.filter(c =>
-        (c.app_type || 'HodewaBot') === activeTab
-    );
+    // Use optimisticCodes directly (server filtered)
+    const filteredCodes = optimisticCodes;
+
+    const setActiveTab = (tab: 'HodewaBot' | 'HodewaLink') => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('type', tab);
+        params.set('page', '1');
+        router.push(`?${params.toString()}`);
+    };
 
     const handleCreateCode = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -322,7 +365,8 @@ export default function CodesPageClient({ codes }: Props) {
                                 <th>Active Devices</th>
                                 {activeTab === 'HodewaBot' && <th>Profiles</th>}
                                 {activeTab === 'HodewaLink' && <th>Links</th>}
-                                <th>Status</th>
+                                <th>Masa Aktif</th>
+                                <th>Code Status</th>
                                 <th className="hidden-mobile">Note</th>
                                 <th className="hidden-mobile">Created</th>
                                 <th className="text-center">Actions</th>
@@ -357,8 +401,18 @@ export default function CodesPageClient({ codes }: Props) {
                                             <td>{item.link_stats?.[0]?.total_scraped || 0}</td>
                                         )}
                                         <td>
+                                            {(() => {
+                                                const activationStatus = getActivationStatus(item);
+                                                return (
+                                                    <span className={`status-badge ${activationStatus.className}`}>
+                                                        {activationStatus.label}
+                                                    </span>
+                                                );
+                                            })()}
+                                        </td>
+                                        <td>
                                             <span className={`status-badge ${item.is_active ? 'status-active' : 'status-inactive'}`}>
-                                                {item.is_active ? 'Active' : 'Inactive'}
+                                                {item.is_active ? 'Active' : 'Paused'}
                                             </span>
                                         </td>
                                         <td className="hidden-mobile">
@@ -413,7 +467,7 @@ export default function CodesPageClient({ codes }: Props) {
                             })}
                             {filteredCodes.length === 0 && (
                                 <tr>
-                                    <td colSpan={activeTab === 'HodewaBot' ? 10 : 10} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
+                                    <td colSpan={activeTab === 'HodewaBot' ? 11 : 11} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
                                         Belum ada activation code untuk {activeTab}. Buat yang baru!
                                     </td>
                                 </tr>

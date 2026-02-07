@@ -1,5 +1,6 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
+import bcrypt from 'bcryptjs';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
@@ -63,7 +64,13 @@ export async function deleteSessionCookie() {
     cookieStore.delete(COOKIE_NAME);
 }
 
-// Check admin password
+// Check admin password using bcrypt hash comparison
 export function checkPassword(password: string): boolean {
-    return password === process.env.ADMIN_PASSWORD;
+    const hashedPassword = process.env.ADMIN_PASSWORD;
+    if (!hashedPassword) {
+        console.error('[Auth] ADMIN_PASSWORD not set in environment!');
+        return false;
+    }
+    // Use bcrypt.compareSync for hash verification
+    return bcrypt.compareSync(password, hashedPassword);
 }
