@@ -72,13 +72,13 @@ export default function CodeDetailClient({ code }: Props) {
         new Date(d.expires_at) > now
     ).length || 0;
 
-    const typeIcon = code.app_type === 'HodewaBot'
+    const typeIcon = code.app_type === 'HudzSender'
         ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="10" rx="2" ry="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path></svg>
-        : code.app_type === 'HodewaLink'
+        : code.app_type === 'HudzLink'
             ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
             : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>;
 
-    const typeColor = code.app_type === 'HodewaBot' ? 'var(--primary)' : code.app_type === 'HodewaLink' ? 'var(--success)' : 'var(--warning)';
+    const typeColor = code.app_type === 'HudzSender' ? 'var(--primary)' : code.app_type === 'HudzLink' ? 'var(--success)' : 'var(--warning)';
 
     // Calculate total usage for last 7 days
     const totalBroadcasts = code.daily_usage?.reduce((sum, u) => sum + (u.broadcasts_count || 0), 0) || 0;
@@ -120,7 +120,7 @@ export default function CodeDetailClient({ code }: Props) {
                             </span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '14px' }}>
-                            <span style={{ color: typeColor, fontWeight: 500 }}>{typeIcon} {code.app_type || 'HodewaBot'}</span>
+                            <span style={{ color: typeColor, fontWeight: 500 }}>{typeIcon} {code.app_type || 'HudzSender'}</span>
                             <span>•</span>
                             <span>Created {formatDateWIB(code.created_at)}</span>
                         </div>
@@ -140,7 +140,7 @@ export default function CodeDetailClient({ code }: Props) {
                     <div className="stat-value">{activeDevices} / {code.max_devices}</div>
                     <div className="stat-label">Active Devices</div>
                 </div>
-                {code.app_type === 'HodewaBot' && (
+                {code.app_type === 'HudzSender' && (
                     <>
                         <div className="stat-card">
                             <div className="stat-value">{code.user_profiles?.length || 0} / {code.max_whatsapp_profiles || 3}</div>
@@ -156,7 +156,7 @@ export default function CodeDetailClient({ code }: Props) {
                         </div>
                     </>
                 )}
-                {code.app_type === 'HodewaLink' && (
+                {code.app_type === 'HudzLink' && (
                     <>
                         <div className="stat-card">
                             <div className="stat-value" style={{ color: 'var(--success)' }}>{code.link_stats?.total_scraped || 0}</div>
@@ -186,7 +186,7 @@ export default function CodeDetailClient({ code }: Props) {
                         <div style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>Max Devices</div>
                         <div style={{ fontWeight: 600 }}>{code.max_devices}</div>
                     </div>
-                    {code.app_type === 'HodewaBot' && (
+                    {code.app_type === 'HudzSender' && (
                         <div>
                             <div style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>Max WA Profiles</div>
                             <div style={{ fontWeight: 600 }}>{code.max_whatsapp_profiles || 3}</div>
@@ -204,10 +204,10 @@ export default function CodeDetailClient({ code }: Props) {
                             <thead>
                                 <tr>
                                     <th>Device ID</th>
-                                    <th>App</th>
-                                    <th>Registered</th>
+                                    <th className="hidden-mobile">App</th>
+                                    <th className="hidden-mobile">Registered</th>
                                     <th>Expires</th>
-                                    <th>Last Check</th>
+                                    <th className="hidden-mobile">Last Check</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -217,15 +217,15 @@ export default function CodeDetailClient({ code }: Props) {
                                     return (
                                         <tr key={device.id}>
                                             <td>
-                                                <code style={{ fontSize: '11px' }}>{device.device_id.substring(0, 16)}...</code>
+                                                <code style={{ fontSize: '11px' }}>{device.device_id.substring(0, 8)}...</code>
                                             </td>
-                                            <td>{device.device_info?.app || code.app_type}</td>
-                                            <td>{formatDateWIB(device.activated_at)}</td>
+                                            <td className="hidden-mobile">{device.device_info?.app || code.app_type}</td>
+                                            <td className="hidden-mobile">{formatDateWIB(device.activated_at)}</td>
                                             <td>{formatDateWIB(device.expires_at)}</td>
-                                            <td>{formatDateWIB(device.last_check)}</td>
+                                            <td className="hidden-mobile">{formatDateWIB(device.last_check)}</td>
                                             <td>
                                                 <span className={`status-badge ${isExpired ? 'status-inactive' : 'status-active'}`}>
-                                                    {isExpired ? 'Expired' : 'Active'}
+                                                    {isExpired ? 'Exp' : 'Act'}
                                                 </span>
                                             </td>
                                         </tr>
@@ -241,8 +241,8 @@ export default function CodeDetailClient({ code }: Props) {
                 )}
             </div>
 
-            {/* HodewaBot: WhatsApp Profiles with Accordion */}
-            {code.app_type === 'HodewaBot' && (
+            {/* HudzSender: WhatsApp Profiles with Accordion */}
+            {code.app_type === 'HudzSender' && (
                 <div className="card">
                     <h3 className="card-title">WhatsApp Profiles ({code.user_profiles?.length || 0})</h3>
                     {code.user_profiles && code.user_profiles.length > 0 ? (
@@ -358,8 +358,8 @@ export default function CodeDetailClient({ code }: Props) {
                 </div>
             )}
 
-            {/* HodewaLink: Link Statistics */}
-            {code.app_type === 'HodewaLink' && (
+            {/* HudzLink: Link Statistics */}
+            {code.app_type === 'HudzLink' && (
                 <div className="card">
                     <h3 className="card-title">Link Activity Details</h3>
                     <div className="link-stats-grid">

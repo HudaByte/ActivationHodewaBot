@@ -59,7 +59,7 @@ interface Props {
 export default function CodesPageClient({ codes }: Props) {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const activeTab = (searchParams.get('type') as 'HodewaBot' | 'HodewaLink') || 'HodewaBot';
+    const activeTab = (searchParams.get('type') as 'HudzSender' | 'HudzLink') || 'HudzSender';
     const [, startTransition] = useTransition();
 
     const [showCreateForm, setShowCreateForm] = useState(false);
@@ -86,7 +86,7 @@ export default function CodesPageClient({ codes }: Props) {
     // Use optimisticCodes directly (server filtered)
     const filteredCodes = optimisticCodes;
 
-    const setActiveTab = (tab: 'HodewaBot' | 'HodewaLink') => {
+    const setActiveTab = (tab: 'HudzSender' | 'HudzLink') => {
         const params = new URLSearchParams(searchParams.toString());
         params.set('type', tab);
         params.set('page', '1');
@@ -106,7 +106,7 @@ export default function CodesPageClient({ codes }: Props) {
                     max_devices: formData.max_devices,
                     duration_days: formData.is_lifetime ? null : formData.duration_days,
                     note: formData.note || null,
-                    max_whatsapp_profiles: activeTab === 'HodewaBot' ? formData.max_whatsapp_profiles : 1,
+                    max_whatsapp_profiles: activeTab === 'HudzSender' ? formData.max_whatsapp_profiles : 1,
                 }),
             });
 
@@ -215,8 +215,8 @@ export default function CodesPageClient({ codes }: Props) {
             <div className="tabs-container" style={{ marginBottom: '24px' }}>
                 <div className="tabs">
                     <button
-                        className={`tab ${activeTab === 'HodewaBot' ? 'tab-active' : ''}`}
-                        onClick={() => setActiveTab('HodewaBot')}
+                        className={`tab ${activeTab === 'HudzSender' ? 'tab-active' : ''}`}
+                        onClick={() => setActiveTab('HudzSender')}
                         style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
                     >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -226,18 +226,18 @@ export default function CodesPageClient({ codes }: Props) {
                             <line x1="8" y1="16" x2="8" y2="16"></line>
                             <line x1="16" y1="16" x2="16" y2="16"></line>
                         </svg>
-                        HodewaBot
+                        HudzSender
                     </button>
                     <button
-                        className={`tab ${activeTab === 'HodewaLink' ? 'tab-active' : ''}`}
-                        onClick={() => setActiveTab('HodewaLink')}
+                        className={`tab ${activeTab === 'HudzLink' ? 'tab-active' : ''}`}
+                        onClick={() => setActiveTab('HudzLink')}
                         style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
                     >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
                             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
                         </svg>
-                        HodewaLink
+                        HudzLink
                     </button>
                 </div>
                 <button
@@ -252,15 +252,15 @@ export default function CodesPageClient({ codes }: Props) {
             {showCreateForm && (
                 <form onSubmit={handleCreateCode} className="card" style={{ marginBottom: '24px' }}>
                     <h3 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        Create New {activeTab === 'HodewaBot' ? (
+                        Create New {activeTab === 'HudzSender' ? (
                             <>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="10" rx="2" ry="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8" y2="16"></line><line x1="16" y1="16" x2="16" y2="16"></line></svg>
-                                HodewaBot
+                                HudzSender
                             </>
                         ) : (
                             <>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                                HodewaLink
+                                HudzLink
                             </>
                         )} Code
                     </h3>
@@ -291,7 +291,7 @@ export default function CodesPageClient({ codes }: Props) {
                             />
                         </div>
 
-                        {activeTab === 'HodewaBot' && (
+                        {activeTab === 'HudzSender' && (
                             <div className="form-group" style={{ marginBottom: 0 }}>
                                 <label className="form-label">Max WA Profiles</label>
                                 <input
@@ -346,13 +346,12 @@ export default function CodesPageClient({ codes }: Props) {
                         <thead>
                             <tr>
                                 <th>Code</th>
-                                <th>Max Devices</th>
-                                <th>Durasi</th>
-                                <th>Active Devices</th>
-                                {activeTab === 'HodewaBot' && <th>Profiles</th>}
-                                {activeTab === 'HodewaLink' && <th>Links</th>}
+                                <th className="hidden-mobile">Product</th>
+                                <th className="hidden-mobile">Durasi</th>
+                                <th>Devices</th>
+                                <th className="hidden-mobile">{activeTab === 'HudzSender' ? 'Profiles' : 'Links'}</th>
                                 <th>Masa Aktif</th>
-                                <th>Code Status</th>
+                                <th className="hidden-mobile">Status</th>
                                 <th className="hidden-mobile">Note</th>
                                 <th className="hidden-mobile">Created</th>
                                 <th className="text-center">Actions</th>
@@ -364,9 +363,9 @@ export default function CodesPageClient({ codes }: Props) {
                                     new Date(d.expires_at) > new Date()
                                 ).length;
 
-                                const typeIcon = item.app_type === 'HodewaBot' ? (
+                                const typeIcon = item.app_type === 'HudzSender' ? (
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="10" rx="2" ry="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path></svg>
-                                ) : item.app_type === 'HodewaLink' ? (
+                                ) : item.app_type === 'HudzLink' ? (
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
                                 ) : (
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
@@ -375,28 +374,45 @@ export default function CodesPageClient({ codes }: Props) {
                                 return (
                                     <tr key={item.id}>
                                         <td>
-                                            <CopyableCode code={item.code} />
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <div
+                                                    className={`status-dot ${item.is_active ? 'bg-success' : 'bg-danger'}`}
+                                                    title={item.is_active ? 'Active' : 'Paused'}
+                                                    style={{
+                                                        width: '8px',
+                                                        height: '8px',
+                                                        borderRadius: '50%',
+                                                        flexShrink: 0,
+                                                        background: item.is_active ? 'var(--success)' : 'var(--danger)'
+                                                    }}
+                                                />
+                                                <CopyableCode code={item.code} />
+                                            </div>
                                         </td>
-                                        <td>{typeIcon} {item.app_type}</td>
-                                        <td>{item.duration_days ? `${item.duration_days} hari` : 'Lifetime'}</td>
-                                        <td>{activeDevices} / {item.max_devices}</td>
-                                        {activeTab === 'HodewaBot' && (
-                                            <td>{item.user_profiles?.length || 0}</td>
-                                        )}
-                                        {activeTab === 'HodewaLink' && (
-                                            <td>{item.link_stats?.[0]?.total_scraped || 0}</td>
-                                        )}
+                                        <td className="hidden-mobile">{typeIcon} {item.app_type}</td>
+                                        <td className="hidden-mobile">{item.duration_days ? `${item.duration_days} hari` : 'Lifetime'}</td>
+                                        <td className="whitespace-nowrap">
+                                            <span style={{ fontWeight: 500 }}>{activeDevices}</span>
+                                            <span style={{ color: 'var(--text-muted)', margin: '0 2px' }}>/</span>
+                                            <span style={{ color: 'var(--text-secondary)' }}>{item.max_devices}</span>
+                                        </td>
+                                        <td className="hidden-mobile">
+                                            {activeTab === 'HudzSender'
+                                                ? (item.user_profiles?.length || 0)
+                                                : (item.link_stats?.[0]?.total_scraped || 0)
+                                            }
+                                        </td>
                                         <td>
                                             {(() => {
                                                 const activationStatus = getActivationStatus(item);
                                                 return (
                                                     <span className={`status-badge ${activationStatus.className}`}>
-                                                        {activationStatus.label}
+                                                        {activationStatus.label.replace('Belum Diaktivasi', 'Unused')}
                                                     </span>
                                                 );
                                             })()}
                                         </td>
-                                        <td>
+                                        <td className="hidden-mobile">
                                             <span className={`status-badge ${item.is_active ? 'status-active' : 'status-inactive'}`}>
                                                 {item.is_active ? 'Active' : 'Paused'}
                                             </span>
@@ -453,7 +469,7 @@ export default function CodesPageClient({ codes }: Props) {
                             })}
                             {filteredCodes.length === 0 && (
                                 <tr>
-                                    <td colSpan={activeTab === 'HodewaBot' ? 11 : 11} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
+                                    <td colSpan={10} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
                                         Belum ada activation code untuk {activeTab}. Buat yang baru!
                                     </td>
                                 </tr>

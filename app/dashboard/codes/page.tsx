@@ -2,7 +2,7 @@ import { createServerClient } from '@/lib/supabase';
 import CodesPageClient from './CodesPageClient';
 import PaginationControl from '@/app/components/PaginationControl';
 
-async function getCodes(page: number, type: string = 'HodewaBot', search: string = '') {
+async function getCodes(page: number, type: string = 'HudzSender', search: string = '') {
     const supabase = createServerClient();
     const limit = 50;
     const from = (page - 1) * limit;
@@ -48,7 +48,7 @@ async function getCodes(page: number, type: string = 'HodewaBot', search: string
 
 export default async function CodesPage({ searchParams }: { searchParams: { page?: string; type?: string; q?: string } }) {
     const page = parseInt(searchParams?.page || '1');
-    const type = searchParams?.type || 'HodewaBot';
+    const type = searchParams?.type || 'HudzSender';
     const search = searchParams?.q || '';
 
     // Pass search params to getCodes

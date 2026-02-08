@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
             .from('activation_codes')
             .insert({
                 code,
-                app_type: app_type || 'HodewaBot',
+                app_type: app_type || 'HudzSender',
                 max_devices,
                 duration_days: duration_days || null,
                 note: note || null,

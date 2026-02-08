@@ -26,8 +26,8 @@ async function getCodeDetails(id: string) {
         return null;
     }
 
-    // For HodewaLink, try to get link stats
-    if (code.app_type === 'HodewaLink') {
+    // For HudzLink, try to get link stats
+    if (code.app_type === 'HudzLink') {
         const { data: linkStats } = await supabase
             .from('link_stats')
             .select('*')

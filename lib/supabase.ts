@@ -33,7 +33,7 @@ export function createServerClient() {
 }
 
 // Types for database tables
-export type AppType = 'HodewaBot' | 'HodewaLink' | 'ALL';
+export type AppType = 'HudzSender' | 'HudzLink' | 'ALL';
 
 export interface ActivationCode {
     id: string;
